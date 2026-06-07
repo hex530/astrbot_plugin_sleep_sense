@@ -1,0 +1,5 @@
+name: astrbot_plugin_sleep_sense
+description: 让 Bot 拥有真实睡眠感知：睡觉、慵懒、熬夜、补觉、吵醒、睡眠周期，像真人一样。
+version: v1.1.0
+author: 夕小柠, 陆渊
+repo: https://github.com/hex530/astrbot_plugin_sleep_sense
