@@ -1,0 +1,125 @@
+# AstrBot Sleep Sense 配置架构
+
+admin_qq:
+  type: string
+  description: 管理员 QQ 号。
+  default: ""
+
+admin_enabled:
+  type: bool
+  description: 是否开启管理员专属逻辑（如：只有管理员能强制唤醒）。
+  default: true
+
+# --- 睡眠与作息 ---
+sleep_enabled:
+  type: bool
+  description: 是否开启自动进入睡眠逻辑。
+  default: true
+
+sleep_time:
+  type: string
+  description: 默认入睡时间 (HH:MM)。
+  default: "23:00"
+
+wake_time:
+  type: string
+  description: 默认起床时间 (HH:MM)。
+  default: "08:00"
+
+sleep_variance:
+  type: int
+  description: 入睡时间波动范围（分钟）。
+  default: 30
+
+wake_variance:
+  type: int
+  description: 起床时间波动范围（分钟）。
+  default: 20
+
+schedule_enabled:
+  type: bool
+  description: 是否开启按周设置作息。
+  default: false
+
+schedule_monday:
+  type: string
+  description: 周一作息 (入睡,起床)，如 "23:30,07:30"。
+  default: "23:00,08:00"
+
+# (此处可根据需要补全周二至周日，暂略以保持简洁，用户可在 WebUI 看到默认)
+
+# --- 吵醒机制 ---
+wake_trigger_enabled:
+  type: bool
+  description: 是否开启吵醒机制。
+  default: true
+
+wake_alert_words:
+  type: string
+  description: 紧急唤醒词，多个用逗号分隔。
+  default: "醒醒,有大事,紧急,快起来"
+
+wake_count_private_admin:
+  type: int
+  description: 私聊中管理员吵醒所需消息数。
+  default: 3
+
+wake_count_group_admin:
+  type: int
+  description: 群聊中管理员艾特吵醒所需消息数。
+  default: 3
+
+wake_count_private_others:
+  type: int
+  description: 私聊中其他人吵醒所需消息数。
+  default: 10
+
+wake_count_group_others:
+  type: int
+  description: 群聊中其他人艾特吵醒所需消息数。
+  default: 6
+
+# --- 梦境系统 ---
+dream_enabled:
+  type: bool
+  description: 是否开启梦境系统。
+  default: true
+
+dream_probability:
+  type: float
+  description: 每晚做梦的概率 (0.0 - 1.0)。
+  default: 0.7
+
+dream_recall_probability:
+  type: float
+  description: 醒来后记得梦境的概率。
+  default: 0.6
+
+dream_recall_on_wake:
+  type: bool
+  description: 起床时是否主动跟管理员提梦境。
+  default: true
+
+# --- 慵懒与熬夜 ---
+lazy_enabled:
+  type: bool
+  description: 是否开启“慵懒”状态（睡前过渡）。
+  default: true
+
+lazy_start:
+  type: string
+  default: "22:00"
+
+lazy_end:
+  type: string
+  default: "23:00"
+
+overtime_enabled:
+  type: bool
+  description: 是否开启熬夜决策逻辑。
+  default: true
+
+overtime_probability:
+  type: float
+  description: 自动决定熬夜的概率。
+  default: 0.1
