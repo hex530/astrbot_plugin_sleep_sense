@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sleep_sense 配置面板</title>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<style>
+  /* ... (样式保持不变) ... */
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- ... (结构保持不变) ... -->
+</div>
+
+<div class="save-bar">
+  <div class="save-info" id="save-info">修改配置后点击保存</div>
+  <div class="save-actions">
+    <button class="btn btn-ghost" onclick="resetDefaults()">恢复默认</button>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 保存配置</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ... (工具函数保持不变) ...
+
+async function saveConfig(){
+  const cfg = buildYaml();
+  const prompts = buildPromptsYaml();
+  const saveInfo = document.getElementById('save-info');
+  
+  saveInfo.textContent = '⏳ 正在保存...';
+  
+  try {
+    const response = await fetch('/api/sleep_sense_config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'save_config',
+        config: jsyaml.load(cfg),
+        prompts: jsyaml.load(prompts)
+      })
+    });
+    
+    const result = await response.json();
+    if (result.status === 'success') {
+      saveInfo.textContent = '✅ 保存成功';
+      saveInfo.style.color = '#6ed8a0';
+      showToast('配置已实时同步并保存！', 'ok');
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (err) {
+    saveInfo.textContent = '❌ 保存失败';
+    saveInfo.style.color = '#f07e8a';
+    showToast('保存失败: ' + err.message, 'err');
+  }
+}
+
+// ... (其余 JS 保持不变) ...
+</script>
+</body>
+</html>
