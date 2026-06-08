@@ -1,7 +1,7 @@
 """
 astrbot_plugin_sleep_sense
 让 Bot 拥有真实睡眠感知的插件。
-作者: 夕小柠  版本: 1.1.7
+作者: 夕小柠  版本: 1.1.9
 """
 
 import asyncio
@@ -26,7 +26,6 @@ STATE_PATH = DATA_DIR / "state.json"
 ALARMS_PATH = DATA_DIR / "alarms.json"
 LOG_PATH = DATA_DIR / "logs" / "sleep.log"
 STATS_DIR = DATA_DIR / "stats"
-OVERTIME_ACTIVE = DATA_DIR / "overtime" / "active.yaml"
 
 # ─── 状态枚举 ──────────────────────────────────────────────────────────────────
 class SleepState:
@@ -37,7 +36,7 @@ class SleepState:
     OVERTIME = "overtime"
 
 
-@register("sleep_sense", "夕小柠", "让 Bot 拥有真实睡眠感知", "1.1.7")
+@register("sleep_sense", "夕小柠", "让 Bot 拥有真实睡眠感知", "1.1.9")
 class SleepSensePlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
@@ -59,7 +58,7 @@ class SleepSensePlugin(Star):
         asyncio.create_task(self._alarm_loop())
         asyncio.create_task(self._log_cleaner())
 
-        logger.info("[sleep_sense] 插件 v1.1.7 已加载，当前状态: " + self.state["sleep_state"])
+        logger.info("[sleep_sense] 插件 v1.1.9 已加载，当前状态: " + self.state["sleep_state"])
         # 注册 WebUI 路由
         self.context.register_webui("sleep_sense_config", self._handle_webui_request)
 

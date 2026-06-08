@@ -35,28 +35,52 @@ async function saveConfig(){
   saveInfo.textContent = '⏳ 正在保存...';
   
   try {
-    const response = await fetch('/api/sleep_sense_config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'save_config',
-        config: jsyaml.load(cfg),
-        prompts: jsyaml.load(prompts)
-      })
-    });
+    // 尝试多个可能的 API 路径
+    const endpoints = [
+      '/api/stars/sleep_sense/sleep_sense_config',
+      '/api/webui/sleep_sense_config',
+      '/api/plugins/sleep_sense/sleep_sense_config'
+    ];
     
-    const result = await response.json();
-    if (result.status === 'success') {
+    let success = false;
+    let lastError = '';
+
+    for (const url of endpoints) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_config',
+            config: jsyaml.load(cfg),
+            prompts: jsyaml.load(prompts)
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.status === 'success') {
+            success = true;
+            break;
+          }
+        }
+      } catch (e) {
+        lastError = e.message;
+      }
+    }
+
+    if (success) {
       saveInfo.textContent = '✅ 保存成功';
       saveInfo.style.color = '#6ed8a0';
       showToast('配置已实时同步并保存！', 'ok');
     } else {
-      throw new Error(result.message);
+      throw new Error('所有接口尝试失败 ' + lastError);
     }
   } catch (err) {
     saveInfo.textContent = '❌ 保存失败';
     saveInfo.style.color = '#f07e8a';
     showToast('保存失败: ' + err.message, 'err');
+    console.error('Save failed:', err);
   }
 }
 
