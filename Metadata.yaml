@@ -1,5 +1,6 @@
 name: sleep_sense
 desc: 让 Bot 拥有真实睡眠感知
-version: v1.2.5
+version: v1.2.6
 author: 夕小柠
 repo: https://github.com/hex530/astrbot_plugin_sleep_sense
+config_schema: config_schema.yaml
