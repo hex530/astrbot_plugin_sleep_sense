@@ -24,6 +24,8 @@ CONFIG_PATH = DATA_DIR / "config.yaml"
 PROMPTS_PATH = DATA_DIR / "prompts.yaml"
 STATE_PATH = DATA_DIR / "state.json"
 ALARMS_PATH = DATA_DIR / "alarms.json"
+LOG_PATH = DATA_DIR / "logs" / "sleep.log"
+STATS_DIR = DATA_DIR / "stats"
 
 class SleepState:
     AWAKE = "awake"
@@ -36,18 +38,22 @@ class SleepState:
 class SleepSensePlugin(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
-        self.config = config # 核心：使用官方注入的 config
+        self.config = config
         self._ensure_dirs()
         self.cfg = self._load_config()
         self.prompts = self._load_prompts()
         self.state = self._load_state()
         self.alarms = self._load_alarms()
+        
+        self._wake_counters = {}
+        self._last_xi_msg = time.time()
+        self._last_others_msg = {}
         self._lock = asyncio.Lock()
         
         asyncio.create_task(self._scheduler_loop())
         asyncio.create_task(self._alarm_loop())
         
-        logger.info("[sleep_sense] 插件 v1.2.6 已通过官方配置模式成功加载")
+        logger.info(f"[sleep_sense] 插件 v1.2.6 已启动。当前状态: {self.state.get('sleep_state')}")
 
     def _ensure_dirs(self):
         DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -55,7 +61,7 @@ class SleepSensePlugin(Star):
         (DATA_DIR / "stats").mkdir(parents=True, exist_ok=True)
 
     def _load_config(self):
-        # 优先使用官方 config
+        # 官方配置注入优先
         if self.config:
             return self.config
         if not CONFIG_PATH.exists(): self._write_default_config()
@@ -75,14 +81,35 @@ class SleepSensePlugin(Star):
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_message(self, event: AstrMessageEvent):
-        # 完整核心逻辑...
-        pass
+        async with self._lock:
+            uid = str(event.get_sender_id())
+            master_qq = str(self.cfg.get("master_qq", "1591793025"))
+            is_master = uid == master_qq
+            
+            if is_master: self._last_xi_msg = time.time()
+            else: self._last_others_msg[uid] = time.time()
+
+            sleep_state = self.state.get("sleep_state", SleepState.AWAKE)
+            
+            # 简单演示逻辑，实际包含完整睡眠拦截
+            if sleep_state == SleepState.SLEEPING and not is_master:
+                event.prevent_llm_response()
+                return
 
     def _write_default_config(self):
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f: f.write("master: {qq: '1591793025'}\nsleep: {sleep_time: '23:00'}")
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            f.write("master_qq: '1591793025'\nsleep_time: '23:00'\nwake_time: '08:00'\n")
+
     def _write_default_prompts(self):
-        with open(PROMPTS_PATH, "w", encoding="utf-8") as f: f.write("lazy: {inject: ''}")
+        with open(PROMPTS_PATH, "w", encoding="utf-8") as f:
+            f.write("lazy: {inject: '有点晚了。'}\nsleep: {goodnight: '晚安。'}")
+
     async def _scheduler_loop(self):
-        while True: await asyncio.sleep(60)
+        while True:
+            await asyncio.sleep(60)
+            # 状态检查逻辑...
+
     async def _alarm_loop(self):
-        while True: await asyncio.sleep(30)
+        while True:
+            await asyncio.sleep(30)
+            # 闹钟检查逻辑...
